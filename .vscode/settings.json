@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.cfg": "plaintext",
+        "system_error": "cpp"
+    }
+}
