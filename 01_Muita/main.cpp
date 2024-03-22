@@ -3,7 +3,7 @@
 using namespace std;
 
 const int MAX_OFFICER_CNT = 100;
-const int MAX_ARRIVAL_CNT = 4E4;
+const int MAX_ARRIVAL_CNT = 2E5;
 
 struct Person
 {
