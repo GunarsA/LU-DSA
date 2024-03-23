@@ -81,6 +81,9 @@ void process(priority_queue<Arrival> &pq, int officers[MAX_OFFICER_CNT][3], int 
 
 int main()
 {
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+
     ifstream fin("customs2.in", ios::in | ios::binary);
 
     int officers[2][MAX_OFFICER_CNT][3];
@@ -128,10 +131,9 @@ int main()
 
     int arrival_cnt = 0;
 
-    auto cmp = [](Arrival a, Arrival b) { return a > b; };
     priority_queue<Arrival> pq1, pq2;
 
-    ofstream fout("customs.out", ios::out);
+    (void)!freopen("customs2.out", "w", stdout);
 
     streampos pos1 = fin.tellg();
     streampos pos2 = fin.tellg();
@@ -139,9 +141,9 @@ int main()
 
     while (true)
     {
+        fin.seekg(pos1);
         while (pq1.empty() && type1 != 'X')
         {
-            fin.seekg(pos1);
 
             int arrival_time;
             fin >> arrival_time;
@@ -153,25 +155,23 @@ int main()
             }
 
             fin >> type1;
-
-            pos1 = fin.tellg();
-
-            if (type1 == 'X')
+        }
+        if (type1 == 'X')
+        {
+            for (int i = 0; i < citizen_officer_cnt; ++i)
             {
-                for(int i = 0; i < citizen_officer_cnt; ++i)
+                if (officers[0][i][1] != -1)
                 {
-                    if (officers[0][i][1] != -1)
-                    {
-                        pq1.push({true, officers[0][i][2], officers[0][i][1], i});
-                        officers[0][i][1] = -1;
-                    }
+                    pq1.push({true, officers[0][i][2], officers[0][i][1], i});
+                    officers[0][i][1] = -1;
                 }
             }
         }
+        pos1 = fin.tellg();
 
+        fin.seekg(pos2);
         while (pq2.empty() && type2 != 'X')
         {
-            fin.seekg(pos2);
 
             int arrival_time;
             fin >> arrival_time;
@@ -183,21 +183,19 @@ int main()
             }
 
             fin >> type2;
-
-            pos2 = fin.tellg();
-
-            if (type2 == 'X')
+        }
+        if (type2 == 'X')
+        {
+            for (int i = 0; i < foreigner_officer_cnt; ++i)
             {
-                for(int i = 0; i < foreigner_officer_cnt; ++i)
+                if (officers[1][i][1] != -1)
                 {
-                    if (officers[1][i][1] != -1)
-                    {
-                        pq2.push({false, officers[1][i][2], officers[1][i][1], i});
-                        officers[1][i][1] = -1;
-                    }
+                    pq2.push({false, officers[1][i][2], officers[1][i][1], i});
+                    officers[1][i][1] = -1;
                 }
             }
         }
+        pos2 = fin.tellg();
 
         if (pq1.empty() && pq2.empty())
         {
@@ -211,12 +209,12 @@ int main()
 
             if (p1 > p2)
             {
-                fout << p1.arrival_time << " " << p1.exit_time << endl;
+                cout << p1.arrival_time << " " << p1.exit_time << "\n";
                 pq1.pop();
             }
             else
             {
-                fout << p2.arrival_time << " " << p2.exit_time << endl;
+                cout << p2.arrival_time << " " << p2.exit_time <<  "\n";
                 pq2.pop();
             }
         }
@@ -224,25 +222,24 @@ int main()
         while (!pq1.empty() && type2 == 'X')
         {
             Arrival p = pq1.top();
-            fout << p.arrival_time << " " << p.exit_time << endl;
+            cout << p.arrival_time << " " << p.exit_time <<  "\n";
             pq1.pop();
         }
 
         while (!pq2.empty() && type1 == 'X')
         {
             Arrival p = pq2.top();
-            fout << p.arrival_time << " " << p.exit_time << endl;
+            cout << p.arrival_time << " " << p.exit_time << "\n";
             pq2.pop();
         }
     }
 
-    if(!arrival_cnt)
+    if (!arrival_cnt)
     {
-        fout << "nothing" << endl;
+        cout << "nothing" << "\n";
     }
 
     fin.close();
-    fout.close();
 
     return 0;
 }
