@@ -4,8 +4,11 @@ using namespace std;
 
 int main()
 {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    
     (void)!freopen("customs2.in", "r", stdin);
-    (void)!freopen("customs.out", "w", stdout);
+    (void)!freopen("customs2.out", "w", stdout);
 
     int citizen_officer_cnt, foreigner_officer_cnt, citizen_time, foreigner_time;
     cin >> citizen_officer_cnt >> foreigner_officer_cnt >> citizen_time >> foreigner_time;
@@ -42,7 +45,7 @@ int main()
 
         int arrival_time;
         cin >> arrival_time;
-        cout << " " << arrival_time << endl;
+        cout << " " << arrival_time << "\n";
 
         cin >> type;
         cout << type;

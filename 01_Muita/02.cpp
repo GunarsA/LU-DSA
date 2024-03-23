@@ -6,14 +6,14 @@ using namespace std;
 
 const int MAX_OFFICER_CNT = 100;
 
-struct Person
+struct Arrival
 {
     bool is_citizen;
     int arrival_time;
     int exit_time;
     int officer_index;
 
-    bool operator<(const Person &other) const
+    bool operator<(const Arrival &other) const
     {
         if (exit_time != other.exit_time)
         {
@@ -29,7 +29,7 @@ struct Person
         }
     }
 
-    bool operator>(const Person &other) const
+    bool operator>(const Arrival &other) const
     {
         if (exit_time != other.exit_time)
         {
@@ -46,7 +46,7 @@ struct Person
     }
 };
 
-void process(priority_queue<Person> &pq, int officers[MAX_OFFICER_CNT][3], int officer_count, int arrival_time, bool is_citizen)
+void process(priority_queue<Arrival> &pq, int officers[MAX_OFFICER_CNT][3], int officer_count, int arrival_time, bool is_citizen)
 {
     bool is_found = false;
     int min_index = 0;
@@ -128,8 +128,8 @@ int main()
 
     int arrival_cnt = 0;
 
-    auto cmp = [](Person a, Person b) { return a > b; };
-    priority_queue<Person> pq1, pq2;
+    auto cmp = [](Arrival a, Arrival b) { return a > b; };
+    priority_queue<Arrival> pq1, pq2;
 
     ofstream fout("customs.out", ios::out);
 
@@ -206,8 +206,8 @@ int main()
 
         while (!pq1.empty() && !pq2.empty())
         {
-            Person p1 = pq1.top();
-            Person p2 = pq2.top();
+            Arrival p1 = pq1.top();
+            Arrival p2 = pq2.top();
 
             if (p1 > p2)
             {
@@ -223,14 +223,14 @@ int main()
 
         while (!pq1.empty() && type2 == 'X')
         {
-            Person p = pq1.top();
+            Arrival p = pq1.top();
             fout << p.arrival_time << " " << p.exit_time << endl;
             pq1.pop();
         }
 
         while (!pq2.empty() && type1 == 'X')
         {
-            Person p = pq2.top();
+            Arrival p = pq2.top();
             fout << p.arrival_time << " " << p.exit_time << endl;
             pq2.pop();
         }

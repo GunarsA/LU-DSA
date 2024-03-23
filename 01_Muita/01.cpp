@@ -3,16 +3,16 @@
 using namespace std;
 
 const int MAX_OFFICER_CNT = 100;
-const int MAX_ARRIVAL_CNT = 2E5;
+const int MAX_ARRIVAL_CNT = 4E6;
 
-struct Person
+struct Arrival
 {
     bool is_citizen;
     int arrival_time;
     int exit_time;
     int officer_index;
 
-    bool operator<(const Person &other) const
+    bool operator<(const Arrival &other) const
     {
         if (exit_time != other.exit_time)
         {
@@ -28,7 +28,7 @@ struct Person
         }
     }
 
-    bool operator>(const Person &other) const
+    bool operator>(const Arrival &other) const
     {
         if (exit_time != other.exit_time)
         {
@@ -94,11 +94,14 @@ void quickSort(T arr[], int low, int high)
 
 int main()
 {
-    (void)!freopen("customs.in", "r", stdin);
-    (void)!freopen("customs.out", "w", stdout);
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    (void)!freopen("customs2.in", "r", stdin);
+    (void)!freopen("customs2.out", "w", stdout);
 
     int officers[2][MAX_OFFICER_CNT][2];
-    Person persons[MAX_ARRIVAL_CNT];
+    Arrival *persons = new Arrival[MAX_ARRIVAL_CNT];
 
     int citizen_officer_cnt, foreigner_officer_cnt, citizen_time, foreigner_time;
     cin >> citizen_officer_cnt >> foreigner_officer_cnt >> citizen_time >> foreigner_time;
@@ -205,7 +208,7 @@ int main()
 
         for (int i = 0; i < arrival_cnt; ++i)
         {
-            cout << persons[i].arrival_time << " " << persons[i].exit_time << endl;
+            cout << persons[i].arrival_time << " " << persons[i].exit_time << "\n";
         }
     }
 

@@ -5,7 +5,7 @@ from enum import Enum
 import random
 
 # File
-OUT_FILE = "customs.in"
+OUT_FILE = "customs2.in"
 
 # Tokens - P or N -> Do not touch
 class Tokens(Enum):
