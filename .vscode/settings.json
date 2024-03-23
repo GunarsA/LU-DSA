@@ -4,6 +4,8 @@
         "system_error": "cpp",
         "iosfwd": "cpp",
         "*.tcc": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "array": "cpp",
+        "string_view": "cpp"
     }
 }

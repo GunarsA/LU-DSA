@@ -3,11 +3,11 @@
 
 using namespace std;
 
-#define IN_FILE "customs2.in"
-#define OUT_FILE "customs2.out"
+#define IN_FILE "customs.in"
+#define OUT_FILE "customs.out"
 
 const int MAX_OFFICER_CNT = 100;
-const int MAX_HEAP_SIZE = 1E3;
+const int MAX_HEAP_SIZE = 1E2;
 
 struct Arrival
 {
@@ -15,6 +15,11 @@ struct Arrival
     int arrival_time;
     int exit_time;
     int officer_index;
+
+    Arrival() {}
+
+    Arrival(bool is_citizen, int arrival_time) : is_citizen(is_citizen),
+                                                 arrival_time(arrival_time) {}
 
     bool operator<(const Arrival &other) const
     {
@@ -54,11 +59,13 @@ struct Officer
     int index;
     int processing_time;
     int next_free_time;
-    Arrival arrive;
+    Arrival processed_arrival;
 
     Officer() {}
 
-    Officer(int index, int processing_time) : index(index), processing_time(processing_time), next_free_time(-1) {}
+    Officer(int index, int processing_time) : index(index),
+                                              processing_time(processing_time),
+                                              next_free_time(-1) {}
 
     bool operator<(const Officer &other) const
     {
@@ -220,7 +227,7 @@ public:
 /**
  * @brief Process function handles the arrival of a new entry and manages the officers' availability.
  *
- * @param exit The heap storing the arrive exit times.
+ * @param exit The heap storing the arrival exit times.
  * @param free The heap storing the free officers.
  * @param busy The heap storing the busy officers.
  * @param entry The new arrival entry.
@@ -232,7 +239,7 @@ void process(MinHeap<Arrival> &exit, MinHeap<Officer> &free, MinHeap<Officer> &b
         Officer officer = busy.top();
         busy.pop();
 
-        exit.push(officer.arrive);
+        exit.push(officer.processed_arrival);
 
         officer.next_free_time = -1;
         free.push(officer);
@@ -243,13 +250,13 @@ void process(MinHeap<Arrival> &exit, MinHeap<Officer> &free, MinHeap<Officer> &b
         Officer officer = busy.top();
         busy.pop();
 
-        exit.push(officer.arrive);
+        exit.push(officer.processed_arrival);
 
         entry.exit_time = officer.next_free_time + officer.processing_time;
         entry.officer_index = officer.index;
 
         officer.next_free_time = entry.exit_time;
-        officer.arrive = entry;
+        officer.processed_arrival = entry;
         busy.push(officer);
     }
     else
@@ -261,7 +268,7 @@ void process(MinHeap<Arrival> &exit, MinHeap<Officer> &free, MinHeap<Officer> &b
         entry.officer_index = officer.index;
 
         officer.next_free_time = entry.exit_time;
-        officer.arrive = entry;
+        officer.processed_arrival = entry;
 
         busy.push(officer);
     }
@@ -276,21 +283,17 @@ int main()
     // -------------------------------- Open input file ---------------------------------
     ifstream fin(IN_FILE, ios::in | ios::binary);
 
+    // ---------------------------- Read initial parameters -----------------------------
     int citizen_officer_cnt, foreigner_officer_cnt, citizen_time, foreigner_time;
     fin >> citizen_officer_cnt >> foreigner_officer_cnt >> citizen_time >> foreigner_time;
 
     // ----------------------------- Process default times ------------------------------
-    int officers[2][MAX_OFFICER_CNT][2];
+    int officers[2][MAX_OFFICER_CNT];
     for (int i = 0; i < citizen_officer_cnt; ++i)
-    {
-        officers[0][i][0] = citizen_time;
-        officers[0][i][1] = -1;
-    }
+        officers[0][i] = citizen_time;
+
     for (int i = 0; i < foreigner_officer_cnt; ++i)
-    {
-        officers[1][i][0] = foreigner_time;
-        officers[1][i][1] = -1;
-    }
+        officers[1][i] = foreigner_time;
 
     // --------------------------- Process non-default times ----------------------------
     char prefix;
@@ -302,13 +305,9 @@ int main()
         fin >> category >> index >> time;
 
         if (category == 'P')
-        {
-            officers[0][index - 1][0] = time;
-        }
+            officers[0][index - 1] = time;
         else
-        {
-            officers[1][index - 1][0] = time;
-        }
+            officers[1][index - 1] = time;
 
         fin >> prefix;
     }
@@ -316,16 +315,12 @@ int main()
     // -------------------------------- Initialize Heaps --------------------------------
     MinHeap<Officer> free_citizen_officers(MAX_OFFICER_CNT), free_foreigner_officers(MAX_OFFICER_CNT);
     for (int i = 0; i < citizen_officer_cnt; ++i)
-    {
-        Officer officer(i, officers[0][i][0]);
-        free_citizen_officers.push(officer);
-    }
+        free_citizen_officers.push(Officer(i, officers[0][i]));
+
     MinHeap<Officer> busy_citizen_officers(MAX_OFFICER_CNT), busy_foreigner_officers(MAX_OFFICER_CNT);
     for (int i = 0; i < foreigner_officer_cnt; ++i)
-    {
-        Officer officer(i, officers[1][i][0]);
-        free_foreigner_officers.push(officer);
-    }
+        free_foreigner_officers.push(Officer(i, officers[1][i]));
+
     MinHeap<Arrival> citizen_exit(MAX_HEAP_SIZE), foreigner_exit(MAX_HEAP_SIZE);
 
     // ------------------------------- Initialize Streams -------------------------------
@@ -351,8 +346,10 @@ int main()
             {
                 ++arrival_cnt;
 
-                Arrival entry = {true, arrival_time, -1, -1};
-                process(citizen_exit, free_citizen_officers, busy_citizen_officers, entry);
+                process(citizen_exit,
+                        free_citizen_officers,
+                        busy_citizen_officers,
+                        Arrival(true, arrival_time));
             }
 
             fin >> citizen_prefix;
@@ -361,8 +358,7 @@ int main()
         {
             while (!busy_citizen_officers.empty())
             {
-                Arrival entry = busy_citizen_officers.top().arrive;
-                citizen_exit.push(entry);
+                citizen_exit.push(busy_citizen_officers.top().processed_arrival);
                 busy_citizen_officers.pop();
             }
         }
@@ -379,8 +375,10 @@ int main()
             {
                 ++arrival_cnt;
 
-                Arrival entry = {false, arrival_time, -1, -1};
-                process(foreigner_exit, free_foreigner_officers, busy_foreigner_officers, entry);
+                process(foreigner_exit,
+                        free_foreigner_officers,
+                        busy_foreigner_officers,
+                        Arrival(false, arrival_time));
             }
 
             fin >> foreigner_prefix;
@@ -389,18 +387,15 @@ int main()
         {
             while (!busy_foreigner_officers.empty())
             {
-                Arrival entry = busy_foreigner_officers.top().arrive;
-                foreigner_exit.push(entry);
+                foreigner_exit.push(busy_foreigner_officers.top().processed_arrival);
                 busy_foreigner_officers.pop();
             }
         }
         foreigner_pos = fin.tellg();
 
-        // --------------------------------- Exit process -------------------------------
+        // ---------------------------------- Exit loop ---------------------------------
         if (citizen_exit.empty() && foreigner_exit.empty())
-        {
             break;
-        }
 
         // ------------------------------ Print exit times ------------------------------
         while (!citizen_exit.empty() && !foreigner_exit.empty())
@@ -419,6 +414,8 @@ int main()
                 foreigner_exit.pop();
             }
         }
+
+        // --------------------------- Print remaining times ----------------------------
         while (!citizen_exit.empty() && foreigner_prefix == 'X')
         {
             Arrival citizen = citizen_exit.top();
@@ -434,10 +431,8 @@ int main()
     }
 
     if (!arrival_cnt)
-    {
         cout << "nothing"
              << "\n";
-    }
 
     fin.close();
 

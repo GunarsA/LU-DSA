@@ -29,7 +29,7 @@ class Ranges(Enum):
     MUITNIEKU_COUNT  = (1, 99)
     MUITNIEKU_W_TIME = (1, 100000)
     OUTLIERS         = (0, -1) # Second val should always be modified
-    IN_PEOPLE_COUNT  = (0, 4000000)
+    IN_PEOPLE_COUNT  = (0, 8000000)
 
     def __init__(self, min_v : int, max_v :int):
         self.min_v = min_v
@@ -91,8 +91,8 @@ def main():
 
     # And now the ppl
     # PPL_COUNT = Ranges.IN_PEOPLE_COUNT.get_random_wighted(2000000, 2000000)
-    PPL_COUNT = 2_000_000
-    _MAX_ARIVAL_TIME = 4_000_000
+    PPL_COUNT = 8_000_000
+    _MAX_ARIVAL_TIME = 8_000_000
     INIT_ARIVAL_TIME = random.randint(100, 200)
     cur_time = INIT_ARIVAL_TIME
     real_ppl_count = -1
