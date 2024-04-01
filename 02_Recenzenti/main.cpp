@@ -1,10 +1,15 @@
 #include <iostream>
 
+#include <chrono>
+
 using namespace std;
 
 #define MAX_NAME_LEN 100
 #define MAX_PSEUDONYM_CNT 50
 #define MAX_REVIEWER_CNT 10000
+
+#define INPUT_FILE "reviews.in"
+#define OUTPUT_FILE "reviewers.out"
 
 struct String
 {
@@ -100,11 +105,28 @@ struct String
     }
 };
 
+template <typename T>
+class Array
+{
+private:
+    T data[MAX_PSEUDONYM_CNT];
+    int size = MAX_PSEUDONYM_CNT;
+
+public:
+    T &operator[](int index)
+    {
+        if (index >= 0 && index < size)
+            return data[index];
+        else
+            throw "Index out of bounds";
+    }
+};
+
 struct Reviewer
 {
     String name;
     int pseudonym_count;
-    int pseudonyms[MAX_PSEUDONYM_CNT];
+    Array<int> pseudonyms;
 
     Reviewer() {}
 
@@ -112,6 +134,11 @@ struct Reviewer
     {
         this->name = name;
         pseudonym_count = 0;
+    }
+
+    bool operator==(const Reviewer &other) const
+    {
+        return name == other.name;
     }
 };
 
@@ -149,17 +176,18 @@ class HashTable
     };
 
     Node **table;
-    int size;
+    int bucket_count;
+    float load_factor = 0.7;
 
     int hash(Key key) const
     {
-        return get_hash(key) % size;
+        return get_hash(key) % bucket_count;
     }
 
 public:
-    HashTable(int bucket_count)
+    HashTable(int max_size)
     {
-        this->size = bucket_count;
+        bucket_count = max_size / load_factor;
         table = new Node *[bucket_count];
         for (int i = 0; i < bucket_count; ++i)
         {
@@ -169,14 +197,20 @@ public:
 
     ~HashTable()
     {
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < bucket_count; ++i)
         {
             Node *node = table[i];
             while (node != nullptr)
             {
                 Node *next = node->next;
+                cout << 1 << " ";
                 delete node;
                 node = next;
+            }
+            cout << endl;
+            if (i % 10000 == 0)
+            {
+                cout << i << endl;
             }
         }
 
@@ -205,7 +239,7 @@ public:
         table[index] = node;
     }
 
-    Value *find(Key key)
+    Value *find(Key key) const
     {
         int index = hash(key);
         Node *node = table[index];
@@ -248,12 +282,30 @@ public:
             node = node->next;
         }
     }
+
+    // void print() const
+    // {
+    //     for (int i = 0; i < bucket_count; ++i)
+    //     {
+    //         Node *node = table[i];
+    //         while (node != nullptr)
+    //         {
+    //             cout << 1 << " ";
+    //         }
+    //         cout << endl;
+    //     }
+    // }
 };
 
 int main()
 {
-    (void)!freopen("reviewers.in", "r", stdin);
-    (void)!freopen("reviewers.out", "w", stdout);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    (void)!freopen(INPUT_FILE, "r", stdin);
+    (void)!freopen(OUTPUT_FILE, "w", stdout);
 
     HashTable<int, String> pseudonyms(MAX_REVIEWER_CNT * MAX_PSEUDONYM_CNT);
     HashTable<String, Reviewer> reviewers(MAX_REVIEWER_CNT);
@@ -269,7 +321,10 @@ int main()
             for (int i = 0; i < new_pseudonym_count; ++i)
             {
                 cin >> new_pseudonyms[i];
+
+                // cout << new_pseudonyms[i] << " ";
             }
+            // cout << endl;
 
             if (reviewers.find(name) == nullptr)
             {
@@ -284,18 +339,18 @@ int main()
             {
                 if (pseudonyms.find(new_pseudonyms[i]) != nullptr)
                 {
-                    if (*(pseudonyms.find(new_pseudonyms[i])) == name)
-                    {
-                        ++cnt;
-                    }
-                    else
+                    if (*(pseudonyms.find(new_pseudonyms[i])) != name)
                     {
                         can_insert = false;
                         break;
                     }
                 }
+                else
+                {
+                    ++cnt;
+                }
 
-                if (reviewer.pseudonym_count + cnt >= MAX_PSEUDONYM_CNT)
+                if (reviewer.pseudonym_count + cnt > MAX_PSEUDONYM_CNT)
                 {
                     can_insert = false;
                     break;
@@ -319,6 +374,8 @@ int main()
             {
                 cout << "no" << endl;
             }
+
+            // cout << reviewer.pseudonym_count << endl;
         }
         else if (prefix == 'D')
         {
@@ -359,6 +416,17 @@ int main()
             }
         }
     }
+
+    // for (int i = 1; i <= 10000; i++)
+    // {
+    //     if (pseudonyms.find(i) != nullptr)
+    //         cout << i << " " << pseudonyms.find(i)->data << endl;
+    // }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    // cout << "Time in miliseconds: " << duration.count() << endl;
 
     return 0;
 }
