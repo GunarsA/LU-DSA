@@ -4,17 +4,116 @@
 
 using namespace std;
 
+#define MAX_NAME_LEN 100
 #define MAX_PSEUDONYM_CNT 50
+
+struct String
+{
+    char data[MAX_NAME_LEN];
+
+    String() {}
+
+    String(char data[])
+    {
+        for (int i = 0; i < MAX_NAME_LEN; ++i)
+        {
+            this->data[i] = data[i];
+            if (data[i] == '\0')
+            {
+                break;
+            }
+        }
+    }
+
+    bool operator==(const String &other) const
+    {
+        for (int i = 0; i < MAX_NAME_LEN; ++i)
+        {
+            if (data[i] != other.data[i])
+            {
+                return false;
+            }
+
+            if (data[i] == '\0')
+            {
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=(const String &other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator<(const String &other) const
+    {
+        for (int i = 0; i < MAX_NAME_LEN; ++i)
+        {
+            if (data[i] < other.data[i])
+            {
+                return true;
+            }
+            else if (data[i] > other.data[i])
+            {
+                return false;
+            }
+
+            if (data[i] == '\0')
+            {
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    bool operator>(const String &other) const
+    {
+        for (int i = 0; i < MAX_NAME_LEN; ++i)
+        {
+            if (data[i] > other.data[i])
+            {
+                return true;
+            }
+            else if (data[i] < other.data[i])
+            {
+                return false;
+            }
+
+            if (data[i] == '\0')
+            {
+                break;
+            }
+        }
+    }
+
+    bool operator<=(const String &other) const
+    {
+        return *this < other || *this == other;
+    }
+
+    bool operator>=(const String &other) const
+    {
+        return *this > other || *this == other;
+    }
+};
 
 struct Reviewer
 {
-    string name;
+    String name;
     int pseudonym_count;
     int pseudonyms[MAX_PSEUDONYM_CNT];
 
     Reviewer() {}
 
-    Reviewer(string name) : name(name), pseudonym_count(0) {}
+    Reviewer(String name)
+    {
+        this->name = name;
+        pseudonym_count = 0;
+    }
 };
 
 int main()
@@ -22,17 +121,17 @@ int main()
     (void)!freopen("reviewers.in", "r", stdin);
     (void)!freopen("reviewers.out", "w", stdout);
 
-    map<int, string> pseudonyms;
-    map<string, Reviewer> reviewers;
+    map<int, String> pseudonyms;
+    map<String, Reviewer> reviewers;
 
     char prefix;
     while (cin >> prefix)
     {
         if (prefix == 'I')
         {
-            string name;
+            String name;
             int new_pseudonym_count, new_pseudonyms[MAX_PSEUDONYM_CNT];
-            cin >> name >> new_pseudonym_count;
+            cin >> name.data >> new_pseudonym_count;
             for (int i = 0; i < new_pseudonym_count; ++i)
             {
                 cin >> new_pseudonyms[i];
@@ -73,7 +172,7 @@ int main()
             {
                 for (int i = 0; i < new_pseudonym_count; ++i)
                 {
-                    if(pseudonyms.find(new_pseudonyms[i]) == pseudonyms.end())
+                    if (pseudonyms.find(new_pseudonyms[i]) == pseudonyms.end())
                     {
                         pseudonyms.insert({new_pseudonyms[i], name});
                         reviewer.pseudonyms[reviewer.pseudonym_count++] = new_pseudonyms[i];
@@ -94,7 +193,7 @@ int main()
 
             if (pseudonyms.find(pseudonym) != pseudonyms.end())
             {
-                string name = pseudonyms[pseudonym];
+                String name = pseudonyms[pseudonym];
                 Reviewer &reviewer = reviewers[name];
 
                 for (int i = 0; i < reviewer.pseudonym_count; ++i)
@@ -118,7 +217,7 @@ int main()
 
             if (pseudonyms.find(pseudonym) != pseudonyms.end())
             {
-                cout << pseudonyms[pseudonym] << endl;
+                cout << pseudonyms[pseudonym].data << endl;
             }
             else
             {
