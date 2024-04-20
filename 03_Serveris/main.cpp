@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define INPUT_FILE "server.in"
+#define INPUT_FILE "server_big.in"
 #define OUTPUT_FILE "server.out"
 
 #define MAX_NODES 20000
